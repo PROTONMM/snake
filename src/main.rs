@@ -1,10 +1,35 @@
-use sdl2::pixels::Color;
+use sdl2::pixels::{Color, PixelFormat};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::render::{WindowCanvas, Texture};
 use sdl2::rect::{Point, Rect};
 use sdl2::image::{self, LoadTexture, InitFlag};
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::surface::Surface;
+
 use std::time::Duration;
+
+pub struct Tail {
+    pub x_pos: i32,
+    pub y_pos: i32,
+}
+
+struct Snake {
+    pub x_pos: i32,
+    pub y_pos: i32,
+    pub angle: i32,
+    pub tail: Vec<Tail>,
+}
+
+impl Snake {
+    pub fn new(x:i32, y:i32, angle:i32) -> Snake {
+        Snake {x_pos: x, y_pos: y, angle: angle, tail: Vec::new() }
+    }
+    pub fn add_tail(&mut self, x:i32, y:i32) {
+        let t = Tail {x_pos: x, y_pos: y};
+        self.tail.push(t);
+    }
+}
 
 
 fn main() -> Result<(), String>{
@@ -24,11 +49,11 @@ fn main() -> Result<(), String>{
         .expect("could not make a canvas");
 
     let texture_creator = canvas.texture_creator();
-    let texture = texture_creator.load_texture("assets/bardo.png")?;
+    let snake_head = texture_creator.load_texture("resources/snake_h.png")?;
+    let snake_body = texture_creator.load_texture("resources/snake_b.png")?;
 
-    let mut iter = 0;
-    let mut frame_x = 0;
-    let mut frame_y = 0;
+    let mut snnake = Snake::new(100,100,90);
+
 
     let vertices: Vec<f32> = vec![
         -0.5, -0.5, 0.0,
@@ -61,27 +86,9 @@ fn main() -> Result<(), String>{
         canvas.clear();
 
         // canvas.copy(&texture,None, None)?;
-        canvas.copy(&texture, Rect::new(frame_x, frame_y, 26, 36), Rect::new(iter, 0, 26, 36))?;
+        canvas.copy(&snake_head, Rect::new(0, 0, 40, 40), Rect::new(0, 0, 40, 40))?;
         canvas.present();
-        iter += 1;
 
-        if iter >= 300 {
-            iter = 0;
-        }
-
-        if iter%10==0 {
-            frame_x += 26;
-        }
-
-
-        if frame_x >= 26*9 {
-            frame_x = 0;
-            frame_y += 36;
-        }
-
-        if frame_y >= 36*4 {
-            frame_y = 0;
-        }
 
         // Delay
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
