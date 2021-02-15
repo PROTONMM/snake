@@ -15,6 +15,8 @@ static STEP_ANGLE: f64 = 3.0;
 static STEP_TAIL: i32 = 3;
 static SCREEN_WIDTH: u32 = 800;
 static SCREEN_HEIGHT: u32 = 600;
+static BACKGROUND_COLOR: (u8, u8, u8, u8) = (100, 100, 100, 255);
+
 
 pub struct Apple {
     pub x_pos: f64,
@@ -195,6 +197,8 @@ fn main() -> Result<(), String>{
         // Render
         //***********************************************************
         canvas.clear();
+        canvas.set_draw_color(BACKGROUND_COLOR);
+
         //render tail
         canvas.copy_ex(&snake_tail,
                        Rect::new(0, 0, 40, 40),
