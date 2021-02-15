@@ -126,6 +126,8 @@ fn main() -> Result<(), String>{
     snake.add_tail(30);
     let mut event_pump = sdl.event_pump()?;
 
+    canvas.set_draw_color(BACKGROUND_COLOR);
+
     //***********************************************************
     // MAIN LOOP
     //***********************************************************
@@ -197,7 +199,7 @@ fn main() -> Result<(), String>{
         // Render
         //***********************************************************
         canvas.clear();
-        canvas.set_draw_color(BACKGROUND_COLOR);
+
 
         //render tail
         canvas.copy_ex(&snake_tail,
