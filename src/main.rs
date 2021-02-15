@@ -9,13 +9,10 @@ use sdl2::image::LoadTexture;
 use rand::Rng;
 use std::time::Duration;
 
+mod static_values;
+mod snake;
 
-static STEP_LEN: f64 = 1.0;
-static STEP_ANGLE: f64 = 3.0;
-static STEP_TAIL: i32 = 3;
-static SCREEN_WIDTH: u32 = 800;
-static SCREEN_HEIGHT: u32 = 600;
-static BACKGROUND_COLOR: (u8, u8, u8, u8) = (100, 100, 100, 255);
+
 
 
 pub struct Apple {
@@ -25,8 +22,8 @@ pub struct Apple {
 
 fn random_place() -> (f64,f64) {
     let mut rng = rand::thread_rng();
-    let x = rng.gen_range(40..SCREEN_WIDTH-40) as f64;
-    let y = rng.gen_range(40..SCREEN_HEIGHT-40) as f64;
+    let x = rng.gen_range(40..static_values::SCREEN_WIDTH-40) as f64;
+    let y = rng.gen_range(40..static_values::SCREEN_HEIGHT-40) as f64;
     (x,y)
 }
 
@@ -43,58 +40,6 @@ impl Apple {
     }
 }
 
-pub struct Tail {
-    pub x_pos: f64,
-    pub y_pos: f64,
-}
-
-struct Snake {
-    pub x_pos: f64,
-    pub y_pos: f64,
-    pub angle: f64,
-    pub step: i32,
-    pub tail: Vec<Tail>,
-}
-
-impl Snake {
-    pub fn new(x:f64, y:f64, angle:f64) -> Snake {
-        Snake {x_pos: x, y_pos: y, angle: angle, step: 0, tail: Vec::new() }
-    }
-    pub fn add_tail(&mut self, count: i32) {
-        let x;
-        let y;
-        if self.tail.len() == 0 {
-            x = self.x_pos;
-            y = self.y_pos;
-        }else {
-            x = self.tail[self.tail.len()-1].x_pos;
-            y = self.tail[self.tail.len()-1].y_pos;
-        }
-        for _ in 0..count {
-            let t = Tail { x_pos: x, y_pos: y };
-            self.tail.push(t);
-        }
-    }
-
-    pub fn next_step(&mut self) {
-        // increment step
-        self.step += 1;
-        // step modulo
-        if self.step % STEP_TAIL == 0 {
-            for i in (1..self.tail.len()).rev() {
-                self.tail[i].y_pos = self.tail[i - 1].y_pos;
-                self.tail[i].x_pos = self.tail[i - 1].x_pos;
-            }
-            self.tail[0].x_pos = self.x_pos;
-            self.tail[0].y_pos = self.y_pos;
-        }
-        let pi_angle = self.angle /180.0 * std::f64::consts::PI;
-        let step_x = pi_angle.cos()*STEP_LEN;
-        let step_y = pi_angle.sin()*STEP_LEN;
-        self.y_pos += step_y;
-        self.x_pos += step_x;
-    }
-}
 
 
 
@@ -104,7 +49,7 @@ fn main() -> Result<(), String>{
 
     let video_subsystem = sdl.video()?;
     let window = video_subsystem
-        .window("Game", SCREEN_WIDTH, SCREEN_HEIGHT)
+        .window("Game", static_values::SCREEN_WIDTH, static_values::SCREEN_HEIGHT)
         // .opengl()
         .resizable()
         .build()
@@ -119,14 +64,14 @@ fn main() -> Result<(), String>{
     let snake_body = texture_creator.load_texture("resources/snake_b.png")?;
     let snake_tail = texture_creator.load_texture("resources/snake_t.png")?;
     let apple_image = texture_creator.load_texture("resources/apple1.png")?;
-    let mut snake = Snake::new(100.0,100.0,90.0);
+    let mut snake = snake::Snake::new(100.0,100.0,90.0);
 
     let mut apple = Apple::new();
 
     snake.add_tail(30);
     let mut event_pump = sdl.event_pump()?;
 
-    canvas.set_draw_color(BACKGROUND_COLOR);
+    canvas.set_draw_color(static_values::BACKGROUND_COLOR);
 
     //***********************************************************
     // MAIN LOOP
@@ -145,10 +90,10 @@ fn main() -> Result<(), String>{
             }
         }
         if event_pump.keyboard_state().is_scancode_pressed(Scancode::Left) {
-            snake.angle -= STEP_ANGLE;
+            snake.angle -= static_values::STEP_ANGLE;
         }
         if event_pump.keyboard_state().is_scancode_pressed(Scancode::Right) {
-            snake.angle += STEP_ANGLE;
+            snake.angle += static_values::STEP_ANGLE;
         }
 
         //***********************************************************
@@ -163,16 +108,16 @@ fn main() -> Result<(), String>{
 
         //wall collision
         if snake.x_pos + 20.0 < 0.0 {
-            snake.x_pos += SCREEN_WIDTH as f64;
+            snake.x_pos += static_values::SCREEN_WIDTH as f64;
         }
-        if snake.x_pos + 20.0 > SCREEN_WIDTH as f64 {
-            snake.x_pos -= SCREEN_WIDTH as f64;
+        if snake.x_pos + 20.0 > static_values::SCREEN_WIDTH as f64 {
+            snake.x_pos -= static_values::SCREEN_WIDTH as f64;
         }
         if snake.y_pos + 20.0 < 0.0 {
-            snake.y_pos += SCREEN_HEIGHT as f64;
+            snake.y_pos += static_values::SCREEN_HEIGHT as f64;
         }
-        if snake.y_pos + 20.0 > SCREEN_HEIGHT as f64 {
-            snake.y_pos -= SCREEN_HEIGHT as f64;
+        if snake.y_pos + 20.0 > static_values::SCREEN_HEIGHT as f64 {
+            snake.y_pos -= static_values::SCREEN_HEIGHT as f64;
         }
 
 
