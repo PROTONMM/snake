@@ -6,6 +6,10 @@ pub struct Tail {
 }
 
 pub struct Snake {
+    default_x_pos: f64,
+    default_y_pos: f64,
+    default_angle: f64,
+    default_tail_len: i32,
     pub x_pos: f64,
     pub y_pos: f64,
     pub angle: f64,
@@ -14,9 +18,28 @@ pub struct Snake {
 }
 
 impl Snake {
-    pub fn new(x:f64, y:f64, angle:f64) -> Snake {
-        Snake {x_pos: x, y_pos: y, angle: angle, step: 0, tail: Vec::new() }
+    pub fn new(x:f64, y:f64, def_angle:f64, def_tail_len: i32) -> Snake {
+        Snake {
+            default_x_pos: x,
+            default_y_pos: y,
+            default_angle: def_angle,
+            default_tail_len: def_tail_len,
+            x_pos: x,
+            y_pos: y,
+            angle: def_angle,
+            step: 0,
+            tail: Vec::new()
+        }
     }
+
+    pub fn reset(&mut self) {
+        self.x_pos = self.default_x_pos;
+        self.y_pos = self.default_y_pos;
+        self.angle = self.default_angle;
+        self.tail.clear();
+        self.add_tail(self.default_tail_len);
+    }
+
     pub fn add_tail(&mut self, count: i32) {
         let x;
         let y;
@@ -50,5 +73,19 @@ impl Snake {
         let step_y = pi_angle.sin()*static_values::STEP_LEN;
         self.y_pos += step_y;
         self.x_pos += step_x;
+    }
+
+    pub fn collision_detection(&self) -> bool {
+        let start_len = static_values::TAIL_START_LEN as usize;
+        for i in start_len..self.tail.len() {
+            let distance = ((self.x_pos - self.tail[i].x_pos).powf(2.0) +
+                (self.y_pos - self.tail[i].y_pos).powf(2.0)).sqrt();
+
+            if distance < static_values::TAIL_COLLISION_DISTANCE {
+                println!("i: {}, snake_len {}", i, self.tail.len());
+                return true;
+            }
+        }
+        false
     }
 }

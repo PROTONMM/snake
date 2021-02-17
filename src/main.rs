@@ -6,41 +6,11 @@ use sdl2::rect::{Point, Rect};
 use sdl2::image::LoadTexture;
 // use sdl2::pixels::PixelFormatEnum;
 // use sdl2::surface::Surface;
-use rand::Rng;
 use std::time::Duration;
 
 mod static_values;
 mod snake;
-
-
-
-
-pub struct Apple {
-    pub x_pos: f64,
-    pub y_pos: f64,
-}
-
-fn random_place() -> (f64,f64) {
-    let mut rng = rand::thread_rng();
-    let x = rng.gen_range(40..static_values::SCREEN_WIDTH-40) as f64;
-    let y = rng.gen_range(40..static_values::SCREEN_HEIGHT-40) as f64;
-    (x,y)
-}
-
-impl Apple {
-    pub fn new() -> Apple {
-        let (x,y) = random_place();
-        Apple {x_pos: x, y_pos: y }
-    }
-
-    pub fn update(&mut self) {
-        let (x,y) = random_place();
-        self.x_pos = x;
-        self.y_pos = y;
-    }
-}
-
-
+mod apple;
 
 
 fn main() -> Result<(), String>{
@@ -64,14 +34,15 @@ fn main() -> Result<(), String>{
     let snake_body = texture_creator.load_texture("resources/snake_b.png")?;
     let snake_tail = texture_creator.load_texture("resources/snake_t.png")?;
     let apple_image = texture_creator.load_texture("resources/apple1.png")?;
-    let mut snake = snake::Snake::new(100.0,100.0,90.0);
+    let mut snake = snake::Snake::new(100.0,100.0,90.0, static_values::TAIL_START_LEN);
+    snake.reset();
 
-    let mut apple = Apple::new();
+    let mut apple = apple::Apple::new();
 
-    snake.add_tail(30);
+    // snake.add_tail(static_values::TAIL_START_LEN);
     let mut event_pump = sdl.event_pump()?;
 
-    canvas.set_draw_color(static_values::BACKGROUND_COLOR);
+
 
     //***********************************************************
     // MAIN LOOP
@@ -120,6 +91,11 @@ fn main() -> Result<(), String>{
             snake.y_pos -= static_values::SCREEN_HEIGHT as f64;
         }
 
+        //tail collision
+        if snake.collision_detection() == true {
+            println!("COLLISION");
+            snake.reset();
+        }
 
         //***********************************************************
         //Calculate
@@ -143,8 +119,10 @@ fn main() -> Result<(), String>{
         //***********************************************************
         // Render
         //***********************************************************
-        canvas.clear();
 
+        //render scene
+        canvas.set_draw_color(static_values::BACKGROUND_COLOR);
+        canvas.clear();
 
         //render tail
         canvas.copy_ex(&snake_tail,
@@ -190,8 +168,15 @@ fn main() -> Result<(), String>{
                        Point::new(20,20),
                        false, false)?;
 
+
+        //render text
+        //TODO: RENDER POINTS
+        canvas.set_draw_color(static_values::TEXT_SCORE_COLOR);
+
+
         canvas.present();
         snake.next_step();
+
 
         // Delay
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
